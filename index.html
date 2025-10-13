@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>déchiffrer césar</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="text">
+        <h1>Welcome to my app</h1>
+        <p>
+          ce programme peut déchiffrer un message chiffré à l’aide de la méthode
+          de César avec la méthode d’analyse des fréquences des lettres
+        </p>
+      </div>
+
+      <div id="input-div" class="input">
+        <textarea
+          id="txt-area"
+          placeholder="Entrer un msg chiffré à methode césar"
+        ></textarea>
+        <button id="btn-input">Déchiffré</button>
+      </div>
+      <div id="display-result"></div>
+    </div>
+
+    <script>
+      const textArea = document.getElementById("txt-area");
+      const btnInput = document.getElementById("btn-input");
+      const display = document.getElementById("display-result");
+      const divInput = document.getElementById("input-div");
+
+      function clearMsg() {
+        const msgOnlyLetters = textArea.value.trim().replace(/[^a-zA-Z]/g, "");
+        const msgLwrCase = msgOnlyLetters.toLowerCase();
+        return msgLwrCase;
+      }
+
+      function frequencyAnalysis() {
+        const msg = clearMsg();
+        const msgSplited = msg.split("");
+        let i,
+          j,
+          mostOccur,
+          nbrOccur,
+          maxOccur = 1;
+
+        for (i = 0; i < msgSplited.length; i++) {
+          nbrOccur = 1;
+          for (j = i + 1; j < msgSplited.length; j++) {
+            if (msgSplited[i] === msgSplited[j]) {
+              nbrOccur++;
+            }
+          }
+          if (maxOccur < nbrOccur) {
+            maxOccur = nbrOccur;
+            mostOccur = msgSplited[i];
+          }
+        }
+        return mostOccur;
+      }
+
+      function findKey() {
+        const letter = frequencyAnalysis();
+        const letterAsciiCode = letter.charCodeAt(0);
+        const eAsciiCode = "e".charCodeAt(0);
+        let key;
+        if (letterAsciiCode > eAsciiCode) {
+          key = letterAsciiCode - eAsciiCode;
+        } else if (letterAsciiCode < eAsciiCode) {
+          key = 26 + letterAsciiCode - eAsciiCode;
+        } else {
+          return 0;
+        }
+        return key;
+      }
+
+      function decrypt() {
+        const msg = clearMsg().split("");
+        const key = findKey();
+        if (key === 0) {
+          return 0;
+        }
+
+        const msgDecrypted = msg.map((el) => {
+          const letterNumber = (el.charCodeAt(0) - 97 - key + 26) % 26;
+          return String.fromCharCode(letterNumber + 97);
+        });
+        return msgDecrypted.join("");
+      }
+
+      function displayHandler() {
+        if (textArea.value === "") {
+          divInput.classList.add("err");
+          setTimeout(() => {
+            divInput.classList.remove("err");
+          }, 1000);
+          return;
+        }
+        const msg = decrypt();
+        if (msg === 0) {
+          alert(
+            'The most frequence letter in ur text is "e" so based on this method of decryption the key must be 0 or 26 the text is not encrypted'
+          );
+          return;
+        }
+        display.innerHTML = "";
+        const pElement = document.createElement("P");
+        pElement.classList.add("result");
+        pElement.innerText = msg;
+        display.appendChild(pElement);
+        display.style.display = "block";
+      }
+
+      btnInput.addEventListener("click", displayHandler);
+    </script>
+  </body>
+</html>
